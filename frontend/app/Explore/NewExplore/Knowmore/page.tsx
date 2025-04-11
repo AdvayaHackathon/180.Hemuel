@@ -1,16 +1,15 @@
-
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ChevronLeft, Info } from 'lucide-react';
 
-/*const page = () => {
+const MonumentInfoPage = () => {
   const [monumentInfo, setMonumentInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   
   // Get the monument ID and name from URL query parameters
   const monumentId = searchParams.get('id');
@@ -19,7 +18,7 @@ import { ChevronLeft, Info } from 'lucide-react';
   useEffect(() => {
     // Redirect to home if no monument ID was provided
     if (!monumentId) {
-      navigate('/');
+      router.push('/');
       return;
     }
 
@@ -44,10 +43,10 @@ import { ChevronLeft, Info } from 'lucide-react';
     };
 
     fetchMonumentInfo();
-  }, [monumentId, navigate]);
+  }, [monumentId, router]);
 
   const handleBackClick = () => {
-    navigate(-1);
+    router.back();
   };
 
   if (loading) {
@@ -101,37 +100,4 @@ import { ChevronLeft, Info } from 'lucide-react';
   );
 };
 
-export default page;*/
-
-
-const page = () => {
-    return (
-        <div className="w-full max-w-2xl mx-auto mt-6 mb-6">
-            <button 
-                className="mb-4 bg-primary/10 text-primary hover:bg-primary/20 py-2 px-4 rounded flex items-center"
-            >
-                <ChevronLeft className="w-4 h-4 mr-1" /> Back
-            </button>
-
-            <div className="bg-card rounded-lg shadow-sm overflow-hidden">
-                <div className="bg-muted/50 p-4 border-b border-border">
-                    <h1 className="text-xl font-bold">Monument Information</h1>
-                </div>
-
-                <div className="p-6">
-                    <div>
-                        <h2 className="text-lg font-semibold mb-2 flex items-center">
-                            <Info className="w-5 h-5 mr-2 text-primary" />
-                            About this Monument
-                        </h2>
-                        <p className="text-muted-foreground">
-                            Monument description goes here.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default page;
+export default MonumentInfoPage;

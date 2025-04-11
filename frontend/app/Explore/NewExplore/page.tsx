@@ -348,8 +348,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
                         return `${distance.toFixed(1)}m away`;
                       })()}
                     </div>
-                    <Link 
-                      href={`/Knowmore`}//?id=${monument.id}&name=${encodeURIComponent(monument.name)}
+                    <Link href= "/Explore/NewExplore/Knowmore?id=${monument.id}&name=${encodeURIComponent(monument.name)}"
                     >
                       <button className="mt-2 w-full text-sm bg-primary/10 text-primary hover:bg-primary/20 py-1 px-3 rounded flex items-center justify-center">
                         <span>Learn More</span>
