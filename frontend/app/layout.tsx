@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space' });
 
 export const metadata: Metadata = {
-  title: 'FenceAI - Protect and Detect Deepfakes in Media',
-  description: 'Harness the power of AI to safeguard against manipulated media.',
+  title: 'GUIDEBOT.AI- TRAVELING. REINVENTED.',
+  description: 'Welcome to GuideBot.AI, your ultimate travel companion!',
 };
 
 export default function RootLayout({

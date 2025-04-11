@@ -308,34 +308,34 @@ const checkMonumentProximity = (coords: [number, number]) => {
           
           <div className="flex flex-col lg:flex-row gap-6 mt-8">
             {/* New Section: Monuments Within 50m */}
-                <div className="w-full lg:w-1/4 bg-card rounded-lg shadow-sm overflow-hidden mt-4">
-                    <div className="bg-muted/50 p-4 border-b border-border flex items-center">
-                     <Landmark className="w-5 h-5 mr-2 text-primary" />
-                    <h2 className="text-lg font-semibold">Know More About Monuments NearBy</h2>
-                    </div>
-  
-                    <div className="p-4">
-                    {location ? (
-                         <>
-                         {(() => {
-                         // Find monuments less than 50m away
-                     const veryCloseMonuments = HARDCODED_MONUMENTS.filter(monument => {
-                             if (!location) return false;
-                                 const distance = calculateDistance(
-                                    location[0], location[1],
-                                     monument.coords[0], monument.coords[1]
-                                 );
-                             return distance < 50;
-                         });
-          
-                        if (veryCloseMonuments.length > 0) {
-                              return (
-                            <ul className="space-y-3">
-                             {veryCloseMonuments.map(monument => (
-                                 <motion.li 
-                                 key={monument.id}
-                                 initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
+<div className="w-full lg:w-1/4 bg-card rounded-lg shadow-sm overflow-hidden mt-4">
+  <div className="bg-muted/50 p-4 border-b border-border flex items-center">
+    <Landmark className="w-5 h-5 mr-2 text-primary" />
+    <h2 className="text-lg font-semibold">Know More About Monuments NearBy</h2>
+  </div>
+
+  <div className="p-4">
+    {location ? (
+      <>
+        {(() => {
+          // Find monuments less than 50m away
+          const veryCloseMonuments = HARDCODED_MONUMENTS.filter(monument => {
+            if (!location) return false;
+            const distance = calculateDistance(
+              location[0], location[1],
+              monument.coords[0], monument.coords[1]
+            );
+            return distance < 50;
+          });
+
+          if (veryCloseMonuments.length > 0) {
+            return (
+              <ul className="space-y-3">
+                {veryCloseMonuments.map(monument => (
+                  <motion.li 
+                    key={monument.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
                     className="bg-card p-3 rounded-md border border-border hover:border-primary/20 hover:bg-primary/5 transition-colors"
                   >
                     <div className="font-medium">{monument.name}</div>
@@ -348,7 +348,9 @@ const checkMonumentProximity = (coords: [number, number]) => {
                         return `${distance.toFixed(1)}m away`;
                       })()}
                     </div>
-                    <Link href={`/knowmore?id=${monument.id}`}>
+                    <Link 
+                      href={`/Knowmore`}//?id=${monument.id}&name=${encodeURIComponent(monument.name)}
+                    >
                       <button className="mt-2 w-full text-sm bg-primary/10 text-primary hover:bg-primary/20 py-1 px-3 rounded flex items-center justify-center">
                         <span>Learn More</span>
                         <ChevronRight className="w-4 h-4 ml-1" />
@@ -364,19 +366,19 @@ const checkMonumentProximity = (coords: [number, number]) => {
                 <p className="text-muted-foreground">No monuments within 50m.</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   Get closer to interesting locations to learn more!
-                         </p>
-                         </div>
-                      );
-                     }
-                     })()}
-                     </>
-                     ) : (
-                    <div className="bg-muted/30 p-6 rounded-md text-center">
-                     <p className="text-muted-foreground">Waiting for your location...</p>
-                   </div>
-                    )}
-                 </div>
-                </div>
+                </p>
+              </div>
+            );
+          }
+        })()}
+      </>
+    ) : (
+      <div className="bg-muted/30 p-6 rounded-md text-center">
+        <p className="text-muted-foreground">Waiting for your location...</p>
+      </div>
+    )}
+  </div>
+</div>
 
             {/* Middle Column: Map (Circular or Full) */}
             <div className="w-full lg:w-2/4 flex flex-col items-center justify-center p-4">
