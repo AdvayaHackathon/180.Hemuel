@@ -2,31 +2,53 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Info } from 'lucide-react';
+import { ChevronLeft, Info, Database, Cross } from 'lucide-react';
 
 const MonumentInfoPage = () => {
-  const [monumentInfo, setMonumentInfo] = useState<string | null>(null);
+  const [monumentInfo, setMonumentInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dbStatus, setDbStatus] = useState({ connected: false, checked: false });
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Get the monument ID and name from URL query parameters
-  const monumentId = searchParams.get('id');
+  // Get the monument name from URL query parameters
   const monumentName = searchParams.get('name');
+  console.log('Monument Name:', monumentName);
+
+  // Check database connection
+  useEffect(() => {
+    const checkDbConnection = async () => {
+      try {
+        const response = await axios.get('/api/mongodb-status');
+        setDbStatus({ 
+          connected: response.data.connected, 
+          checked: true 
+        });
+      } catch (err) {
+        setDbStatus({ 
+          connected: false, 
+          checked: true 
+        });
+        console.error('Failed to check database status:', err);
+      }
+    };
+
+    checkDbConnection();
+  }, []);
 
   useEffect(() => {
-    // Redirect to home if no monument ID was provided
-    if (!monumentId) {
-      router.push('/');
+    // Redirect to home if no monument name was provided
+    if (!monumentName) {
+      router.push('/Explore/NewExplore');
       return;
     }
 
     const fetchMonumentInfo = async () => {
       try {
         setLoading(true);
-        // Replace with your actual API endpoint that fetches by ID
-        const response = await axios.get(`/api/monuments/${monumentId}/description`);
+        // Using the MongoDB API endpoint with monument name
+        const response = await axios.get(`/api/monuments/${encodeURIComponent(monumentName)}/monumentDescription`);
         
         if (response.data && response.data.description) {
           setMonumentInfo(response.data.description);
@@ -43,15 +65,39 @@ const MonumentInfoPage = () => {
     };
 
     fetchMonumentInfo();
-  }, [monumentId, router]);
+  }, [monumentName, router]);
 
   const handleBackClick = () => {
     router.back();
   };
 
+  const DatabaseStatus = () => (
+    <div className="absolute top-2 right-2 flex items-center">
+      {dbStatus.checked ? (
+        dbStatus.connected ? (
+          <div className="flex items-center text-green-500 text-sm">
+            <Database className="w-4 h-4 mr-1" />
+            <span>DB Connected</span>
+          </div>
+        ) : (
+          <div className="flex items-center text-red-500 text-sm">
+            <Cross className="w-4 h-4 mr-1" />
+            <span>DB Disconnected</span>
+          </div>
+        )
+      ) : (
+        <div className="flex items-center text-gray-400 text-sm">
+          <Database className="w-4 h-4 mr-1" />
+          <span>Checking DB...</span>
+        </div>
+      )}
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="w-full flex items-center justify-center p-8">
+      <div className="w-full flex items-center justify-center p-8 relative">
+        <DatabaseStatus />
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         <p className="ml-4 text-muted-foreground">Loading...</p>
       </div>
@@ -60,7 +106,8 @@ const MonumentInfoPage = () => {
 
   if (error) {
     return (
-      <div className="w-full max-w-2xl mx-auto mt-6 p-4 bg-card rounded-lg border border-border">
+      <div className="w-full max-w-2xl mx-auto mt-6 p-4 bg-card rounded-lg border border-border relative">
+        <DatabaseStatus />
         <p className="text-muted-foreground">{error}</p>
         <button 
           onClick={handleBackClick}
@@ -81,7 +128,8 @@ const MonumentInfoPage = () => {
         <ChevronLeft className="w-4 h-4 mr-1" /> Back
       </button>
 
-      <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm overflow-hidden relative">
+        <DatabaseStatus />
         <div className="bg-muted/50 p-4 border-b border-border">
           <h1 className="text-xl font-bold">{monumentName || "Monument Information"}</h1>
         </div>
@@ -90,7 +138,7 @@ const MonumentInfoPage = () => {
           <div>
             <h2 className="text-lg font-semibold mb-2 flex items-center">
               <Info className="w-5 h-5 mr-2 text-primary" />
-              About this Monument
+              {monumentName}
             </h2>
             <p className="text-muted-foreground">{monumentInfo}</p>
           </div>

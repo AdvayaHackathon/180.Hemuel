@@ -1,6 +1,9 @@
 // lib/mongodb.js
 import { MongoClient } from 'mongodb';
 
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 
+  process.env.MONGODB_URI.replace(/:([^@]+)@/, ':***@') : 
+  'Not defined');
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }

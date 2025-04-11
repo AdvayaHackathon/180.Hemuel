@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
+
 // Dynamically import the MapComponent with ssr disabled
 const MapComponent = dynamic(
   () => import('./MapComponent').then(mod => mod.default), 
@@ -348,8 +349,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
                         return `${distance.toFixed(1)}m away`;
                       })()}
                     </div>
-                    <Link href= "/Explore/NewExplore/Knowmore?id=${monument.id}&name=${encodeURIComponent(monument.name)}"
-                    >
+                    <Link href={`/Explore/NewExplore/Knowmore?name=${encodeURIComponent(monument.name)}`}>
                       <button className="mt-2 w-full text-sm bg-primary/10 text-primary hover:bg-primary/20 py-1 px-3 rounded flex items-center justify-center">
                         <span>Learn More</span>
                         <ChevronRight className="w-4 h-4 ml-1" />
@@ -625,5 +625,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
     </main>
   );
 };
-
+export function getHardcodedMonuments() {
+  return HARDCODED_MONUMENTS;
+}
 export default Page;
