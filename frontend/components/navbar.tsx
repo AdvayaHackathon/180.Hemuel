@@ -45,7 +45,7 @@ export function Navbar() {
               <span>Plan</span>
             </Link>
             <Link
-              href="/Explore"
+              href="/Explore/NewExplore"
               className="flex items-center space-x-2 hover:text-primary transition-colors"
             >
               <TentTree className="w-4 h-4" />

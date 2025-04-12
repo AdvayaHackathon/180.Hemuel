@@ -32,12 +32,12 @@ export function Footer() {
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/protect" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/Plan" className="text-muted-foreground hover:text-primary transition-colors">
                   Plan
                 </Link>
               </li>
               <li>
-                <Link href="/detect" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/Explore/NewExplore" className="text-muted-foreground hover:text-primary transition-colors">
                  Explore
                 </Link>
               </li>

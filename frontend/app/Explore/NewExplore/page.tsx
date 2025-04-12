@@ -1,17 +1,29 @@
 'use client';
 
 import type React from "react";
-
+import axios from 'axios';
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { ChevronRight, Telescope, History, MapPin, Map, Settings, Landmark, AlertTriangle, Target } from "lucide-react";
-import { Instagram, TentTree } from 'lucide-react';
+import { ChevronRight, Telescope, History, MapPin, Map, Settings, Landmark, Star, Target } from "lucide-react";
+
 import Link from "next/link";
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
+
+// Global variable declaration
+let Monument = {
+  name: '',
+  coords: [0, 0] as [number, number]
+};
+
+// Export for use in other files
+export { Monument };
+  
+// MongoDB connec
+// Function to pass monument name to another file
 
 // Dynamically import the MapComponent with ssr disabled
 const MapComponent = dynamic(
@@ -38,23 +50,58 @@ interface Monument {
 
 // Minimum distance in meters to consider a location change significant
 const SIGNIFICANT_DISTANCE = 20; // 20 meters
-// Proximity distance for monument alerts (1km = 1000m)
-const MONUMENT_PROXIMITY = 1000; // 1km
-// Display monuments within 5km radius
-const MONUMENT_DISPLAY_RADIUS = 5000; // 5km
-
+// Proximity distance for monument alerts (500m)
+const MONUMENT_PROXIMITY = 500; // Changed from 1000m to 500m
+// Display monuments within 2km radius
+const MONUMENT_DISPLAY_RADIUS = 2000; // Changed from 5000m to 2000m
 // Hardcoded monuments
 const HARDCODED_MONUMENTS: Monument[] = [
   {
-    id: "monument-1",
-    name: "Monument One",
-    coords: [13.014281, 77.544687],
+    id: "monument-1", 
+    name: "Indian Overseaes Bank",
+    coords: [13.000042, 77.544353],
     icon: "landmark"
   },
   {
     id: "monument-2",
-    name: "Monument Two",
-    coords: [13.004252, 77.544677],
+    name: "Sadhguru Siddharudha Udyanavana", 
+    coords: [13.003209, 77.546343 ], // Moved ~6km away
+    icon: "museum"
+  },
+  {
+    id: "monument-3",
+    name: "Kalyan Jewellers India Limited",
+    coords: [13.004296, 77.544683], // Moved ~7km away
+    icon: "landmark"
+  },
+  {
+    id: "monument-4",
+    name: "BGS College of Engineering",
+    coords: [13.004296, 77.544683], // Moved ~8km away
+    icon: "landmark"
+  },
+  {
+    id: "monument-5",
+    name: "Mahalakshmi Layout Bhovipalya Park",
+    coords: [13.006806, 77.544925],
+    icon: "museum"
+  },
+  {
+    id: "monument-6",
+    name: "BWSSB Tank",
+    coords: [12.998920, 77.546379], // Moved ~8.5km away
+    icon: "landmark"
+  },
+  {
+    id: "monument-7",
+    name: "Rajaji Nagar Substation",
+    coords: [12.991480, 77.550992],
+    icon: "landmark"
+  },
+  {
+    id: "monument-8",
+    name: "Hotel Aditya",
+    coords: [13.003913, 77.543432],
     icon: "museum"
   }
 ];
@@ -91,8 +138,6 @@ const Page = () => {
 
     return R * c;
   };
-
-
 
   // Find nearby monuments within specified radius
   const findNearbyMonuments = (coords: [number, number]) => {
@@ -139,7 +184,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
         const alertId = Date.now().toString();
         const newAlert = {
           id: alertId,
-          message: `You are within 1km of "${monument.name}"! (${distance.toFixed(0)}m away)`
+          message: `You are within 500m of "${monument.name}"! (${distance.toFixed(0)}m away)` // Changed from 1km to 500m
         };
         
         setAlerts(prev => [newAlert, ...prev]);
@@ -162,7 +207,6 @@ const checkMonumentProximity = (coords: [number, number]) => {
     });
   };
  
-
   // Function to dismiss an alert
   const dismissAlert = (id: string) => {
     setAlerts(prev => prev.filter(alert => alert.id !== id));
@@ -192,7 +236,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
     }
   };
 
-  // Function to center the map on current location
+  // Function to center the map on current location (keeping default zoom)
   const centerMapOnLocation = () => {
     setTriggerMapCenter(prev => prev + 1);
   };
@@ -293,7 +337,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
                   className="flex items-center justify-between bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-4 rounded-md"
                 >
                   <div className="flex items-center">
-                    <AlertTriangle className="w-5 h-5 mr-2" />
+                    <Star className="w-5 h-5 mr-2" />
                     <p>{alert.message}</p>
                   </div>
                   <button 
@@ -308,7 +352,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
           )}
           
           <div className="flex flex-col lg:flex-row gap-6 mt-8">
-            {/* New Section: Monuments Within 50m */}
+            {/* New Section: Monuments Within 120m */}
 <div className="w-full lg:w-1/4 bg-card rounded-lg shadow-sm overflow-hidden mt-4">
   <div className="bg-muted/50 p-4 border-b border-border flex items-center">
     <Landmark className="w-5 h-5 mr-2 text-primary" />
@@ -316,68 +360,107 @@ const checkMonumentProximity = (coords: [number, number]) => {
   </div>
 
   <div className="p-4">
-    {location ? (
-      <>
-        {(() => {
-          // Find monuments less than 50m away
-          const veryCloseMonuments = HARDCODED_MONUMENTS.filter(monument => {
-            if (!location) return false;
-            const distance = calculateDistance(
-              location[0], location[1],
-              monument.coords[0], monument.coords[1]
-            );
-            return distance < 50;
-          });
+  {location ? (
+    <>
+      {(() => {
+        // Find monuments less than 120m away
+        const veryCloseMonuments = HARDCODED_MONUMENTS.filter(monument => {
+          if (!location) return false;
+          const distance = calculateDistance(
+            location[0], location[1],
+            monument.coords[0], monument.coords[1]
+          );
+          return distance < 120;
+        });
 
-          if (veryCloseMonuments.length > 0) {
-            return (
-              <ul className="space-y-3">
-                {veryCloseMonuments.map(monument => (
-                  <motion.li 
-                    key={monument.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-card p-3 rounded-md border border-border hover:border-primary/20 hover:bg-primary/5 transition-colors"
-                  >
-                    <div className="font-medium">{monument.name}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {(() => {
-                        const distance = calculateDistance(
-                          location[0], location[1],
-                          monument.coords[0], monument.coords[1]
-                        );
-                        return `${distance.toFixed(1)}m away`;
-                      })()}
-                    </div>
-                    <Link href={`/Explore/NewExplore/Knowmore?name=${encodeURIComponent(monument.name)}`}>
-                      <button className="mt-2 w-full text-sm bg-primary/10 text-primary hover:bg-primary/20 py-1 px-3 rounded flex items-center justify-center">
-                        <span>Learn More</span>
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </button>
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-            );
-          } else {
-            return (
-              <div className="bg-muted/30 p-6 rounded-md text-center">
-                <p className="text-muted-foreground">No monuments within 50m.</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Get closer to interesting locations to learn more!
-                </p>
-              </div>
-            );
-          }
-        })()}
-      </>
-    ) : (
-      <div className="bg-muted/30 p-6 rounded-md text-center">
-        <p className="text-muted-foreground">Waiting for your location...</p>
-      </div>
-    )}
-  </div>
+        if (veryCloseMonuments.length > 0) {
+          return (
+            <ul className="space-y-3">
+              {veryCloseMonuments.map(monument => (
+                <motion.li 
+                  key={monument.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-card p-3 rounded-md border border-border hover:border-primary/20 hover:bg-primary/5 transition-colors"
+                >
+                  <div className="font-medium">{monument.name}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {(() => {
+                      const distance = calculateDistance(
+                        location[0], location[1],
+                        monument.coords[0], monument.coords[1]
+                      );
+                      return `${distance.toFixed(1)}m away`;
+                    })()}
+                  </div>
+                  <Link href={`/Explore/NewExplore/Knowmore?name=${encodeURIComponent(monument.name)}`}>
+                    <button className="mt-2 w-full text-sm bg-primary/10 text-primary hover:bg-primary/20 py-1 px-3 rounded flex items-center justify-center">
+                      <span>Learn More</span>
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </button>
+                  </Link>
+                  {Monument.name=monument.name};
+                </motion.li>
+                
+              ))}
+            </ul>
+          );
+        } else {
+          return (
+            <div className="bg-muted/30 p-6 rounded-md text-center">
+              <p className="text-muted-foreground">No monuments within 50m.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Get closer to interesting locations to learn more!
+              </p>
+            </div>
+          );
+        }
+      })()}
+    </>
+  ) : (
+    <div className="bg-muted/30 p-6 rounded-md text-center">
+      <p className="text-muted-foreground">Waiting for your location...</p>
+    </div>
+  )}
 </div>
+
+{/* Only show one history button section, regardless of the number of monuments */}
+<div className="p-4">
+  {location && (() => {
+    const veryCloseMonuments = HARDCODED_MONUMENTS.filter(monument => {
+      if (!location) return false;
+      const distance = calculateDistance(
+        location[0], location[1],
+        monument.coords[0], monument.coords[1]
+      );
+      return distance < 120;
+    });
+
+    if (veryCloseMonuments.length > 0) {
+      // Only show one exploration history button that leads to a general history page
+      return (
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="mt-6"
+        >
+          <Link href={`/Explore/ExploreHistory?name=${encodeURIComponent(Monument.name)}`}>
+            <button
+              className="w-full bg-gradient-to-r from-primary to-primary/80 text-white font-medium py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <History className="w-5 h-5" />
+              View Exploration History
+              <ChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+          </Link>
+        </motion.div>
+      );
+    }
+    return null;
+  })()}
+</div>
+ 
+        </div>
 
             {/* Middle Column: Map (Circular or Full) */}
             <div className="w-full lg:w-2/4 flex flex-col items-center justify-center p-4">
@@ -495,7 +578,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
                 </div>
               </motion.div>
 
-{/* Monument Information Section - Now showing only monuments within 5km */}
+{/* Monument Information Section - Now showing only monuments within 2km */}
 <motion.div 
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
@@ -504,7 +587,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
 >
   <div className="bg-muted/50 p-4 border-b border-border flex items-center">
     <Landmark className="w-5 h-5 mr-2 text-primary" />
-    <h3 className="font-semibold">Nearby Monuments (5km)</h3>
+    <h3 className="font-semibold">Nearby Monuments (2km)</h3> {/* Changed from 5km to 2km */}
   </div>
   
   <div className="p-4">
@@ -539,7 +622,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
       </ul>
     ) : (
       <div className="text-center py-3 text-muted-foreground">
-        No monuments within 5km radius.
+        No monuments within 2km radius. {/* Changed from 5km to 2km */}
       </div>
     )}
   </div>
@@ -566,8 +649,8 @@ const checkMonumentProximity = (coords: [number, number]) => {
                     <>
                       <p className="text-sm text-muted-foreground">Updating every 10 seconds</p>
                       <p className="text-sm text-muted-foreground">Recording changes &gt; {SIGNIFICANT_DISTANCE}m</p>
-                      <p className="text-sm text-muted-foreground">Monument alerts within {MONUMENT_PROXIMITY/1000}km</p>
-                      <p className="text-sm text-muted-foreground">Monument display within {MONUMENT_DISPLAY_RADIUS/1000}km</p>
+                      <p className="text-sm text-muted-foreground">Monument alerts within {MONUMENT_PROXIMITY/1000}km</p> {/* Will show 0.5km */}
+                      <p className="text-sm text-muted-foreground">Monument display within {MONUMENT_DISPLAY_RADIUS/1000}km</p> {/* Will show 2km */}
                     </>
                   )}
                 </div>
@@ -601,21 +684,7 @@ const checkMonumentProximity = (coords: [number, number]) => {
                 </motion.div>
               )}
               
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="mt-6"
-              >
-                <Link href="/ExploreHistory">
-                  <button
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 text-white font-medium py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-                  >
-                    <History className="w-5 h-5" />
-                    View Exploration History
-                    <ChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </button>
-                </Link>
-              </motion.div>
+              
             </div>
           </div>
         </motion.div>

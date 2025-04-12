@@ -192,7 +192,7 @@ export function HeroSection() {
 
   <ShimmerButton className="w-auto px-8 py-8 aspect-square">
     <button
-      onClick={() => router.push("/Explore")}
+      onClick={() => router.push("/Explore/NewExplore")}
       className="text-xl font-semibold text-white bg-transparent hover:bg-primary/20 transition-all duration-300"
     >
       <TentTree className="w-50 h-50 mr-2 inline-block" />

@@ -6,7 +6,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import { Landmark, Building, FerrisWheel, TentTree } from 'lucide-react';
 
 let DefaultIcon = L.icon({
     iconUrl: icon.src,
@@ -99,7 +98,7 @@ const MapComponent = ({ location, autoCenterEnabled = true, monuments = [] }: Ma
   useEffect(() => {
     if (mapRef.current && !mapInstanceRef.current) {
       // Initialize map
-      mapInstanceRef.current = L.map(mapRef.current).setView(location, 15);
+      mapInstanceRef.current = L.map(mapRef.current).setView(location, 200);
       
       // Add tile layer
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

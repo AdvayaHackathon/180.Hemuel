@@ -73,6 +73,7 @@ const MonumentInfoPage = () => {
 
   const DatabaseStatus = () => (
     <div className="absolute top-2 right-2 flex items-center">
+  
       {dbStatus.checked ? (
         dbStatus.connected ? (
           <div className="flex items-center text-green-500 text-sm">
@@ -131,7 +132,6 @@ const MonumentInfoPage = () => {
       <div className="bg-card rounded-lg shadow-sm overflow-hidden relative">
         <DatabaseStatus />
         <div className="bg-muted/50 p-4 border-b border-border">
-          <h1 className="text-xl font-bold">{monumentName || "Monument Information"}</h1>
         </div>
 
         <div className="p-6">
